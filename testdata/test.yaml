@@ -1,0 +1,8 @@
+redis:
+    server:  "localhost:6379"
+    monitor: 1000
+
+mysql:
+    server: "localhost:3306"
+    user: "root"
+    password: "yeah right :)"

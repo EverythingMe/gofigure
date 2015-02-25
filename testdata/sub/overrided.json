@@ -1,0 +1,13 @@
+{
+    "redis": {
+        "server":  "localhost:6379",
+        "monitor": 2000,
+        "timeout": 20    
+    },
+
+    "mysql": {
+        "user": "woot",
+        "password": "this should be overrided"
+    }
+
+}

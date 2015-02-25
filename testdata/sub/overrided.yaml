@@ -1,0 +1,5 @@
+redis:
+    # these values should be overrided by the higher file
+    server:  "localhost:6378"
+    monitor: 2000
+    timeout: 10
