@@ -30,11 +30,8 @@ func main() {
 	//if we set some default, the loader will override it
 	conf.Redis.Server = "localhost:6377"
 
-	// init a loader with a YAML decoder
-	loader := gofigure.Loader{
-		decoder:    yaml.Decoder{},
-		StrictMode: true,
-	}
+	// init a loader with a YAML decoder in strict mode
+	loader := gofigure.NewLoader(yaml.Decoder{}, true)
 
 	// run recursively on some directory
 	err := loader.LoadRecursive(conf, "/etc/myservice/conf.d")

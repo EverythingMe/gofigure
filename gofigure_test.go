@@ -99,11 +99,8 @@ func ExampleLoader() {
 	//if we set some default, the loader will override it
 	conf.Redis.Server = "localhost:6377"
 
-	// init a loader with a YAML decoder
-	loader := Loader{
-		decoder:    yaml.Decoder{},
-		StrictMode: true,
-	}
+	// init a loader with a YAML decoder in strict mode
+	loader := NewLoader(yaml.Decoder{}, true)
 
 	// run recursively on the testdata directory
 	err := loader.LoadRecursive(conf, "./testdata")

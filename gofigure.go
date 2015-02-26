@@ -36,6 +36,14 @@ type Loader struct {
 	StrictMode bool
 }
 
+// NewLoader creates and returns a new Loader wrapping a decoder, using strict mode if specified
+func NewLoader(d Decoder, strict bool) *Loader {
+	return &Loader{
+		decoder:    d,
+		StrictMode: strict,
+	}
+}
+
 // LoadRecursive takes a pointer to a struct containing configurations, and a series of paths.
 // It then traverses the paths recursively in their respective order, and lets the decoder decode
 // every relevant file.
