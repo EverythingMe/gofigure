@@ -12,7 +12,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 // Decoder is the interface for config decoders (right now we've just implemented a YAML one)
@@ -42,7 +41,10 @@ type Loader struct {
 // every relevant file.
 func (l Loader) LoadRecursive(config interface{}, paths ...string) error {
 
-	for path := range walk(paths...) {
+	ch, cancelc := walk(paths...)
+	defer close(cancelc)
+
+	for path := range ch {
 		log.Println(path)
 		if l.decoder.CanDecode(path) {
 
@@ -95,7 +97,7 @@ func isDirectory(path string) (bool, error) {
 
 // walkDir recursively traverses a directory, sending every found file's path to the channel ch.
 // If no one is reading from ch, it times out after a second of waiting, and quits
-func walkDir(path string, ch chan string) {
+func walkDir(path string, ch chan string, cancelc <-chan struct{}) {
 
 	files, err := ioutil.ReadDir(path)
 
@@ -110,35 +112,37 @@ func walkDir(path string, ch chan string) {
 			log.Printf("Could not stat dir %s: %s", fullpath, err)
 			continue
 		} else if isdir {
-			walkDir(fullpath, ch)
+			walkDir(fullpath, ch, cancelc)
 			continue
 		}
 
 		select {
 		case ch <- fullpath:
 
-		case <-time.After(100 * time.Millisecond): //if the reader has quit we will time out writing if the channel buffer is full
-			log.Printf("Cannot write to channel, timing out")
+		case <-cancelc:
+			log.Printf("Read canceled")
 			return
 		}
+
 	}
 
 }
 
 // walk takes a series of paths, and traverses them recursively by order, sending all found files
 // in the returned channel. It then closes the channel
-func walk(paths ...string) (pathchan <-chan string) {
+func walk(paths ...string) (pathchan <-chan string, cancelchan chan<- struct{}) {
 
 	// we make the channel buffered so it can be filled while the consumer loads files
 	ch := make(chan string, 100)
+	cancelc := make(chan struct{})
 
 	go func() {
 		defer close(ch)
 		for _, path := range paths {
-			walkDir(path, ch)
+			walkDir(path, ch, cancelc)
 		}
 	}()
 
-	return ch
+	return ch, cancelc
 
 }
