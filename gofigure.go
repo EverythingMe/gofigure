@@ -53,9 +53,9 @@ func (l Loader) LoadRecursive(config interface{}, paths ...string) error {
 	defer close(cancelc)
 
 	for path := range ch {
-		log.Println(path)
-		if l.decoder.CanDecode(path) {
 
+		if l.decoder.CanDecode(path) {
+			log.Println("Reading config file", path)
 			err := l.LoadFile(config, path)
 			if err != nil {
 				log.Printf("Error loading %s: %s", path, err)
@@ -93,16 +93,6 @@ func (l Loader) LoadFile(config interface{}, path string) error {
 	return nil
 }
 
-func isDirectory(path string) (bool, error) {
-	fileInfo, err := os.Stat(path)
-
-	if err != nil {
-		return false, err
-	}
-
-	return fileInfo.IsDir(), nil
-}
-
 // walkDir recursively traverses a directory, sending every found file's path to the channel ch.
 // If no one is reading from ch, it times out after a second of waiting, and quits
 func walkDir(path string, ch chan string, cancelc <-chan struct{}) {
@@ -116,10 +106,7 @@ func walkDir(path string, ch chan string, cancelc <-chan struct{}) {
 
 	for _, file := range files {
 		fullpath := filepath.Join(path, file.Name())
-		if isdir, err := isDirectory(fullpath); err != nil {
-			log.Printf("Could not stat dir %s: %s", fullpath, err)
-			continue
-		} else if isdir {
+		if file.IsDir() {
 			walkDir(fullpath, ch, cancelc)
 			continue
 		}
