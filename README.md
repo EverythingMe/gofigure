@@ -44,3 +44,36 @@ func main() {
 }
 
 ```
+
+## Automatic -conf and -confdir flags
+
+GoFigure can automatically add the optional `-conf ` and `-confdir` flags to your program's command line flags, and then
+automatically read config files specified by them.
+
+To do that, simply add an import to `"github.com/EverythingMe/gofigure/autoflag"`.
+
+You can then use `autoflag.Load` to load either a single file or all files in the directory specified by these flags.
+
+Modifying the above example to do this:
+
+
+```go
+
+import (
+    // ... other imports ... 
+    
+	"github.com/EverythingMe/gofigure"
+    "github.com/EverythingMe/gofigure/autoflag"
+)
+
+func main() {
+	
+	// in this example we also use the default loader which loads yaml files,
+    // but any loader can work here
+    err := autoflag.Load(gofigure.DefaultLoader, &conf)
+    if err != nil {
+		panic(err)
+	}
+    
+}
+```

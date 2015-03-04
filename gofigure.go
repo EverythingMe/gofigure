@@ -7,12 +7,16 @@
 package gofigure
 
 import (
+	"github.com/EverythingMe/gofigure/yaml"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 )
+
+// DefaultDecoder is a yaml based decoder that can be used for convenience
+var DefaultLoader = NewLoader(yaml.Decoder{}, true)
 
 // Decoder is the interface for config decoders (right now we've just implemented a YAML one)
 type Decoder interface {
@@ -55,7 +59,7 @@ func (l Loader) LoadRecursive(config interface{}, paths ...string) error {
 	for path := range ch {
 
 		if l.decoder.CanDecode(path) {
-			log.Println("Reading config file", path)
+
 			err := l.LoadFile(config, path)
 			if err != nil {
 				log.Printf("Error loading %s: %s", path, err)
@@ -74,7 +78,10 @@ func (l Loader) LoadRecursive(config interface{}, paths ...string) error {
 // and uses the decoder to read the file's contents into the struct. It returns an
 // error if the file could not be opened or properly decoded
 func (l Loader) LoadFile(config interface{}, path string) error {
+
+	log.Println("Reading config file", path)
 	fp, err := os.Open(path)
+
 	if err != nil {
 		log.Printf("Error opening file %s: %s", path, err)
 		if l.StrictMode {
