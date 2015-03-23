@@ -7,12 +7,13 @@
 package gofigure
 
 import (
-	"github.com/EverythingMe/gofigure/yaml"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/EverythingMe/gofigure/yaml"
 )
 
 // DefaultDecoder is a yaml based decoder that can be used for convenience

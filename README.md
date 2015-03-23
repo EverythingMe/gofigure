@@ -77,3 +77,46 @@ func main() {
     
 }
 ```
+
+## Reloading configurations on the fly
+
+GoFigure provides a primitive utility for waiting on config reloads. Right now the only implemented method
+is to send a SIGHUP to the process, and have the process using GoFigure use a `ReloadMonitor`, with a `Reloader`
+that gets called when that signal is sent.
+
+We do not deal with the actual loading, as each program has its own sensitivites to what parts can be reconfigured in 
+runtime and which can't.
+
+### Example:
+
+```go
+
+import (
+    // ... other imports ... 
+    
+	"github.com/EverythingMe/gofigure"
+    "github.com/EverythingMe/gofigure/autoflag"
+)
+
+
+// loadConfigs is used both to initially load the configs, and to refresh them
+func loadConfigs() {
+	if err := autoflag.Load(gofigure.DefaultLoader, &conf); err != nil {
+        log.Println(err)
+    }
+}
+
+
+func main() {
+	
+	loadConfigs()
+    
+    // Create a SignalMonitor that calls a reloader when SIGHUP is sent to our process
+    m := gofigure.NewSignalMonitor()
+    
+    // make the monitor wait for siguhup and call configReload when it needs to
+	m.Monitor(gofigure.ReloadFunc(loadConfigs))
+    
+}
+
+```
